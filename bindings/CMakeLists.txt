@@ -34,6 +34,18 @@ set_target_properties(geometric PROPERTIES
 )
 target_link_libraries(geometric PRIVATE ompl::ompl)
 ############################################
+# Control
+############################################
+file(GLOB CONTROL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/control/*.cpp")
+nanobind_add_module(control
+    STABLE_ABI
+    ${CONTROL_SOURCES}
+)
+set_target_properties(control PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ompl
+)
+target_link_libraries(control PRIVATE ompl::ompl)
+############################################
 # Util
 ############################################
 # Add the module

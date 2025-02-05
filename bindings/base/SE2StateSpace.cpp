@@ -19,31 +19,18 @@ void initSE2StateSpace(nb::module_& m) {
         .def("setYaw", &ompl::base::SE2StateSpace::StateType::setYaw);
 
     // Bind ScopedState<SE2StateSpace>
-    nb::class_<ompl::base::ScopedState<ompl::base::SE2StateSpace>>(m, "StateSE2")
+    auto se2Sub = m.def_submodule("se2");
+    nb::class_<ompl::base::ScopedState<ompl::base::SE2StateSpace>>(se2Sub, "State")
         .def(nb::init<const std::shared_ptr<ompl::base::SpaceInformation>&>())
         .def(nb::init<std::shared_ptr<ompl::base::StateSpace>>())
         .def("random", &ompl::base::ScopedState<ompl::base::SE2StateSpace>::random)
-        .def("getX", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self) {
-            return self->getX();
-        })
-        .def("getY", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self) {
-            return self->getY();
-        })
-        .def("getYaw", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self) {
-            return self->getYaw();
-        })
-        .def("setX", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self, double x) {
-            self->setX(x);
-        })
-        .def("setY", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self, double y) {
-            self->setY(y);
-        })
-        .def("setXY", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self, double x, double y) {
-            self->setXY(x, y);
-        })
-        .def("setYaw", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self, double yaw) {
-            self->setYaw(yaw);
-        });
+        .def("getX", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self) {return self->getX();})
+        .def("getY", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self) {return self->getY();})
+        .def("getYaw", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self) {return self->getYaw();})
+        .def("setX", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self, double x) {self->setX(x);})
+        .def("setY", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self, double y) {self->setY(y);})
+        .def("setXY", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self, double x, double y) {self->setXY(x, y);})
+        .def("setYaw", [](ompl::base::ScopedState<ompl::base::SE2StateSpace>& self, double yaw) {self->setYaw(yaw);});
 
     nb::class_<ompl::base::SE2StateSpace, ompl::base::CompoundStateSpace>(m, "_SE2StateSpace")
         .def(nb::init<>())
