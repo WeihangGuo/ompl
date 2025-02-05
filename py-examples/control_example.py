@@ -65,10 +65,10 @@ def isStateValid(spaceInformation, state):
     # satisfied
     return spaceInformation.satisfiesBounds(state)
 
-def propagate(start, control, duration, state):
-    state.setX(start.getX() + control[0] * duration * cos(start.getYaw()))
-    state.setY(start.getY() + control[0] * duration * sin(start.getYaw()))
-    state.setYaw(start.getYaw() + control[1] * duration)
+def propagate(temp1, control, duration, state):
+    state.setX(temp1.getX() + control[0] * duration * cos(temp1.getYaw()))
+    state.setY(temp1.getY() + control[0] * duration * sin(temp1.getYaw()))
+    state.setYaw(temp1.getYaw() + control[1] * duration)
 
 def plan():
     # construct the state space we are planning in
@@ -111,12 +111,12 @@ def plan():
 
     # (optionally) set planner
     si = ss.getSpaceInformation()
-    #planner = oc.RRT(si)
+    planner = oc.RRT(si)
     #planner = oc.EST(si)
     #planner = oc.KPIECE1(si) # this is the default
     # SyclopEST and SyclopRRT require a decomposition to guide the search
-    decomp = MyDecomposition(32, bounds)
-    planner = oc.SyclopEST(si, decomp)
+    # decomp = MyDecomposition(32, bounds)
+    # planner = oc.SyclopEST(si, decomp)
     #planner = oc.SyclopRRT(si, decomp)
     ss.setPlanner(planner)
     # (optionally) set propagation step size

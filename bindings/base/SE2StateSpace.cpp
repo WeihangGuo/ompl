@@ -9,7 +9,7 @@ namespace nb = nanobind;
 
 void initSE2StateSpace(nb::module_& m) {
     // Bind the StateType   
-    nb::class_<ompl::base::SE2StateSpace::StateType>(m, "SE2StateType")
+    nb::class_<ompl::base::SE2StateSpace::StateType, ompl::base::CompoundStateSpace::StateType>(m, "SE2StateType")
         .def("getX", &ompl::base::SE2StateSpace::StateType::getX)
         .def("getY", &ompl::base::SE2StateSpace::StateType::getY)
         .def("getYaw", &ompl::base::SE2StateSpace::StateType::getYaw)

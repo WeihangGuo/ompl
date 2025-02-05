@@ -8,7 +8,9 @@
 namespace nb = nanobind;
 
 void initRealVectorControlSpace(nb::module_ &m) {
-    nb::class_<ompl::control::ControlSpace>(m, "ControlSpace");
+    nb::class_<ompl::control::RealVectorControlSpace::ControlType, ompl::control::Control>(m, "RealVectorControl")
+        .def("__getitem__", [](const ompl::control::RealVectorControlSpace::ControlType &control, unsigned int i) { return control[i]; })
+        .def("__setitem__", [](ompl::control::RealVectorControlSpace::ControlType &control, unsigned int i, double v) { control[i] = v; });
     nb::class_<ompl::control::RealVectorControlSpace, ompl::control::ControlSpace>(m, "RealVectorControlSpace")
         .def(nb::init<const ompl::base::StateSpacePtr&, unsigned int>())
         .def("setBounds", &ompl::control::RealVectorControlSpace::setBounds)

@@ -7,6 +7,7 @@
 #include "ompl/control/planners/syclop/Decomposition.h"
 #include "ompl/base/SpaceInformation.h"
 #include "ompl/control/planners/syclop/Syclop.h"
+#include "ompl/control/planners/rrt/RRT.h"
 #include "ompl/control/planners/syclop/SyclopEST.h"
 #include "ompl/base/Planner.h"
 
@@ -39,4 +40,7 @@ void initPlanners(nb::module_& m) {
     nb::class_<ompl::control::Syclop, ompl::base::Planner>(m, "Syclop");
     nb::class_<ompl::control::SyclopEST, ompl::control::Syclop>(m, "SyclopEST")
         .def(nb::init<const ompl::control::SpaceInformationPtr&, const std::shared_ptr<ompl::control::GridDecomposition>>());
+
+    nb::class_<ompl::control::RRT, ompl::base::Planner>(m, "RRT")
+        .def(nb::init<const ompl::control::SpaceInformationPtr&>());
 }

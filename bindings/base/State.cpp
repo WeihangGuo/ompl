@@ -7,8 +7,7 @@
 namespace nb = nanobind;
 
 void initState(nb::module_& m) {
-    // Base State class
-    // nb::class_<ompl::base::State>(m, "State");
+    nb::class_<ompl::base::State>(m, "State");
         // .def("castTo", [](const ompl::base::State &self) {
         //     return nb::cpp_function([&self](const nb::type_object& type) -> nb::object {
         //         if (nb::isinstance<ompl::base::SE2StateSpace::StateType>(nb::cast(&self)))
@@ -19,8 +18,5 @@ void initState(nb::module_& m) {
         // });
 
     // CompoundState class
-    // nb::class_<ompl::base::CompoundState, ompl::base::State>(m, "CompoundState");
-    auto base = m.def_submodule("base");
-    nb::class_<ompl::base::ScopedState<ompl::base::StateSpace>>(base, "State")
-        .def(nb::init<const ompl::base::StateSpacePtr&>());
+    nb::class_<ompl::base::CompoundState, ompl::base::State>(m, "CompoundState");
 }

@@ -53,7 +53,7 @@ void initSimpleSetup(nb::module_& m) {
         .def("haveSolutionPath", &ompl::control::SimpleSetup::haveSolutionPath)
         .def("haveExactSolutionPath", &ompl::control::SimpleSetup::haveExactSolutionPath)
         .def("getSolutionPath", &ompl::control::SimpleSetup::getSolutionPath, nb::rv_policy::reference)
-        
+        .def("getSolutionPath", &ompl::control::SimpleSetup::getSolutionPath, nb::rv_policy::reference)
         // Setup and utility
         .def("setup", &ompl::control::SimpleSetup::setup)
         .def("clear", &ompl::control::SimpleSetup::clear)

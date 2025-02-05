@@ -19,5 +19,6 @@ void initSpaceInformation(nb::module_& m) {
         .def("freeState", &ompl::base::SpaceInformation::freeState)
         .def("getMotionValidator", nb::overload_cast<>(&ompl::base::SpaceInformation::getMotionValidator, nb::const_))
         .def("setValidStateSamplerAllocator", &ompl::base::SpaceInformation::setValidStateSamplerAllocator)
-        .def("clearValidStateSamplerAllocator", &ompl::base::SpaceInformation::clearValidStateSamplerAllocator);
+        .def("clearValidStateSamplerAllocator", &ompl::base::SpaceInformation::clearValidStateSamplerAllocator)
+        .def("satisfiesBounds", &ompl::base::SpaceInformation::satisfiesBounds);
 }
