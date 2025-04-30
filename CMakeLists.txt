@@ -1,6 +1,23 @@
-cmake_minimum_required(VERSION 3.12)
-project(ompl VERSION 1.6.0 LANGUAGES CXX)
-set(OMPL_ABI_VERSION 17)
+cmake_minimum_required(VERSION 3.15)
+project(ompl VERSION 1.7.0 LANGUAGES CXX)
+set(OMPL_ABI_VERSION 18)
+
+# Use the FindBoost provided by CMake, rather than the one provided by Boost
+# (for CMake >=3.30).
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.30")
+    cmake_policy(SET CMP0167 OLD)
+endif()
+
+# set the default build type
+if (NOT CMAKE_BUILD_TYPE)
+    # By default, use Release mode
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
+
+    # On 32bit architectures, use RelWithDebInfo
+    if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+        set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build" FORCE)
+    endif()
+endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
@@ -26,6 +43,29 @@ add_definitions(-DBOOST_TEST_DYN_LINK)
 # Avoid valgrind error due to overflow error, cf. https://github.com/ompl/ompl/issues/664
 add_definitions(-DBOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS)
 
+set_package_properties(Boost PROPERTIES
+    URL "https://www.boost.org"
+    PURPOSE "Used throughout OMPL for data serialization, graphs, etc.")
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost 1.68 REQUIRED COMPONENTS serialization filesystem system program_options)
+
+# on macOS we need to check whether to use libc++ or libstdc++ with clang++
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
+    include(GetPrerequisites)
+    get_prerequisites("${Boost_SYSTEM_LIBRARY}" _libs 0 0 "/" "")
+    set(CXXSTDLIB "")
+    foreach(_lib ${_libs})
+        if(_lib MATCHES "libc\\+\\+")
+            set(CXXSTDLIB "libc++")
+        elseif(_lib MATCHES "libstdc\\+\\+")
+            set(CXXSTDLIB "libstdc++")
+        endif()
+    endforeach()
+    if(CXXSTDLIB)
+        add_definitions(-stdlib=${CXXSTDLIB})
+    endif()
+endif()
+
 set_package_properties(Threads PROPERTIES
     URL "https://en.wikipedia.org/wiki/POSIX_Threads"
     PURPOSE "Pthreads is sometimes needed, depending on OS / compiler.")
@@ -33,12 +73,29 @@ find_package(Threads QUIET)
 
 enable_testing()
 
+set_package_properties(Python PROPERTIES
+    URL "https://www.python.org"
+    PURPOSE "Used for python bindings.")
+# find_package(Python QUIET)
 
-set_package_properties(Boost PROPERTIES
-    URL "https://www.boost.org"
-    PURPOSE "Used throughout OMPL for data serialization, graphs, etc.")
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.68 REQUIRED COMPONENTS serialization filesystem system program_options)
+find_package(Python 3.8 REQUIRED COMPONENTS Interpreter Development OPTIONAL_COMPONENTS Development.SABIModule)
+find_boost_python()
+
+include(FetchContent)
+FetchContent_Declare(
+  nanobind
+  GIT_REPOSITORY https://github.com/wjakob/nanobind.git
+  GIT_TAG        v2.0.0
+)
+FetchContent_MakeAvailable(nanobind)
+
+
+if(PYTHON_FOUND)
+    set_package_properties(pypy PROPERTIES
+        URL "https://pypy.org"
+        PURPOSE "Used to speed up the generation of python bindings.")
+    find_package(pypy QUIET)
+endif()
 
 set_package_properties(Eigen3 PROPERTIES
     URL "http://eigen.tuxfamily.org"
@@ -57,6 +114,8 @@ set_package_properties(flann PROPERTIES
 find_package(flann CONFIG 1.9.2 QUIET)
 if (FLANN_FOUND)
     set(OMPL_HAVE_FLANN 1)
+else ()
+    set(OMPL_HAVE_FLANN 0)
 endif()
 
 set_package_properties(spot PROPERTIES
@@ -72,13 +131,27 @@ set_package_properties(Doxygen PROPERTIES
     PURPOSE "Used to create the OMPL documentation (i.e., https://ompl.kavrakilab.org).")
 find_package(Doxygen)
 
+# Numpy is used to convert Eigen matrices/vectors to numpy arrays
+if(PYTHON_FOUND)
+    find_python_module(numpy)
+    if (PY_NUMPY)
+        find_boost_numpy()
+        if(Boost_NUMPY_LIBRARY)
+            set(OMPL_HAVE_NUMPY 1)
+            include_directories(SYSTEM "${PY_NUMPY}/core/include")
+        endif()
+    endif()
+endif()
+
+# R is needed for running Planner Arena locally
 find_program(R_EXEC R)
 
 add_subdirectory(src)
+# add_subdirectory(py-bindings)
 add_subdirectory(bindings)
-# add_subdirectory(tests)
-# add_subdirectory(demos)
-# add_subdirectory(scripts)
+add_subdirectory(tests)
+add_subdirectory(demos)
+add_subdirectory(scripts)
 add_subdirectory(doc)
 
 if(NOT MSVC)
@@ -139,6 +212,20 @@ add_custom_target(uninstall
 
 include(CPackSettings)
 
+option(OMPL_REGISTRATION "Enable one-time registration of OMPL" ON)
+if (OMPL_REGISTRATION)
+    find_file(OMPL_REGISTERED ".registered" PATHS "${CMAKE_CURRENT_SOURCE_DIR}" NO_DEFAULT_PATH)
+    if (NOT OMPL_REGISTERED)
+        file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/.registered" "")
+        find_package(Python QUIET)
+        if (PYTHON_FOUND)
+            execute_process(COMMAND ${CMAKE_COMMAND} -E env
+               TERM="" "${PYTHON_EXEC}" "-m" "webbrowser" "https://ompl.kavrakilab.org/core/register.html"
+                OUTPUT_QUIET ERROR_QUIET)
+        endif()
+    endif()
+endif()
+
 # install catkin package.xml (needed for ROS installation)
 install(FILES package.xml
     DESTINATION share/${PROJECT_NAME})
@@ -150,13 +237,26 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/ament_index/resource_index/packa
 set_package_properties(PkgConfig PROPERTIES
     URL "https://www.freedesktop.org/wiki/Software/pkg-config/"
     PURPOSE "Used to find (compilation flags for) dependencies.")
-
+# set_package_properties(castxml PROPERTIES
+#     URL "https://github.com/CastXML/CastXML"
+#     PURPOSE "Used to generate Python bindings.")
 feature_summary(DESCRIPTION INCLUDE_QUIET_PACKAGES WHAT ALL)
 # additional feature info: show which Python modules were found and weren't found
 get_property(PY_MODULES_FOUND GLOBAL PROPERTY PY_MODULES_FOUND)
-
+if(PY_MODULES_FOUND)
+    list(REMOVE_DUPLICATES PY_MODULES_FOUND)
+    string(REPLACE ";" " " PY_MODULES_FOUND_STR "${PY_MODULES_FOUND}")
+    message(STATUS "The following Python modules were found:\n\n * ${PY_MODULES_FOUND_STR}\n")
+endif()
+get_property(PY_MODULES_NOTFOUND GLOBAL PROPERTY PY_MODULES_NOTFOUND)
+if(PY_MODULES_NOTFOUND)
+    list(REMOVE_DUPLICATES PY_MODULES_NOTFOUND)
+    string(REPLACE ";" " " PY_MODULES_NOTFOUND_STR "${PY_MODULES_NOTFOUND}")
+    message(STATUS "The following Python modules were NOT found:\n\n * ${PY_MODULES_NOTFOUND_STR}\n")
+endif()
 
 # Create targets for building docker images
 # See CMakeModules/OMPLUtils.cmake and scripts/docker for details
 add_docker_target(ompl)
 add_docker_target(plannerarena scripts)
+
