@@ -62,13 +62,17 @@ jobs:
       with:
         python-version: '3.12'
 
+    - name: Find Python executable
+      id: python
+      run: echo "executable=$(which python)" >> $GITHUB_OUTPUT
+
     - name: Build & Test (Linux, macOS)
       if: runner.os != 'Windows'
       uses: ashutoshvarma/action-cmake-build@master
       with:
         build-dir: ${{ runner.workspace }}/build
         build-type: Release
-        configure-options: -DOMPL_BUILD_DEMOS=OFF -DVAMP_PORTABLE_BUILD=ON -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/install -DOMPL_PYTHON_INSTALL_PREFIX=${{ runner.workspace }}/install/python
+        configure-options: -DOMPL_BUILD_DEMOS=OFF -DVAMP_PORTABLE_BUILD=ON -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/install -DOMPL_PYTHON_INSTALL_PREFIX=${{ runner.workspace }}/install/python -DPython_EXECUTABLE=${{ steps.python.outputs.executable }}
         run-test: true
         ctest-options: --output-on-failure
         install-build: true
