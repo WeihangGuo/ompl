@@ -17,12 +17,10 @@ repos:
       - id: clang-format
         types_or: [c, c++]
 
-  # Python linting and formatting
+  # Python formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.9.4
     hooks:
-      - id: ruff
-        args: [--fix]
       - id: ruff-format
 
   # CMake formatting
