@@ -29,8 +29,9 @@ repos:
     hooks:
       - id: cmake-format
 
-  # Markdown formatting
+  # Markdown formatting (exclude doc/ which uses Doxygen-specific syntax)
   - repo: https://github.com/executablebooks/mdformat
     rev: 0.7.21
     hooks:
       - id: mdformat
+        exclude: ^doc/
