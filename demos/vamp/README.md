@@ -5,12 +5,15 @@ This directory includes demos using [VAMP](https://github.com/KavrakiLab/vamp) S
 ## Python
 
 ### Requirements
+
 Install the required dependencies:
+
 ```bash
 pip install requirements.txt
 ```
 
 Go to your `ompl` directory and install the latest VAMP version:
+
 ```bash
 cd external/vamp
 pip install .
@@ -33,6 +36,7 @@ python3 vamp/VampPlanning.py --benchmark --n_trials 100
 If PlannerArena is installed, you can visualize at `localhost:8888` or the port printed in the terminal output.
 
 Visualize the robot, environment and planned trajectory at `localhost:8080`:
+
 ```bash
 python3 vamp/VampPlanning.py --visualize
 ```

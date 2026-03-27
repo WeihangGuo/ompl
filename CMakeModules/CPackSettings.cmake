@@ -7,8 +7,7 @@ set(CPACK_COMPONENTS_ALL ompl python)
 # display names for components
 set(CPACK_COMPONENT_OMPL_DISPLAY_NAME "OMPL library, headers, and demos")
 set(CPACK_COMPONENT_PYTHON_DISPLAY_NAME "Python bindings")
-# descriptions of components
-# intercomponent dependencies
+# descriptions of components intercomponent dependencies
 set(CPACK_COMPONENT_PYTHON_DEPENDS ompl)
 # core library is required
 set(CPACK_COMPONENT_OMPL_REQUIRED ON)
@@ -34,22 +33,27 @@ set(CPACK_SOURCE_GENERATOR "TGZ;ZIP")
 set(CPACK_GENERATOR "TGZ")
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(CPACK_GENERATOR "DEB;${CPACK_GENERATOR}")
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
-        set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
-    endif()
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
-        set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-    endif()
-    execute_process(COMMAND "/usr/bin/lsb_release" "-rs"
-        OUTPUT_VARIABLE UBUNTU_RELEASE
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}_${PROJECT_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}-Ubuntu${UBUNTU_RELEASE}")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "python${PYTHON_VERSION}, libboost-serialization-dev, libboost-program-options-dev, libboost-test-dev, libtriangle-dev")
+  set(CPACK_GENERATOR "DEB;${CPACK_GENERATOR}")
+  if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
+  endif()
+  if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+  endif()
+  execute_process(
+    COMMAND "/usr/bin/lsb_release" "-rs"
+    OUTPUT_VARIABLE UBUNTU_RELEASE
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(CPACK_PACKAGE_FILE_NAME
+      "${PROJECT_NAME}_${PROJECT_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}-Ubuntu${UBUNTU_RELEASE}"
+  )
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS
+      "python${PYTHON_VERSION}, libboost-serialization-dev, libboost-program-options-dev, libboost-test-dev, libtriangle-dev"
+  )
 endif()
 
 if(WIN32)
-    set(CPACK_GENERATOR "ZIP")
+  set(CPACK_GENERATOR "ZIP")
 endif()
 
 include(CPack)
